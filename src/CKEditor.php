@@ -1,45 +1,37 @@
 <?php
 
-namespace Waynestate\Nova\CKEditor4Field;
+namespace Waynestate\Nova;
 
-use Laravel\Nova\Fields\SupportsDependentFields;
-use Waynestate\Nova\CKEditor4Field\Handlers\DiscardPendingAttachments;
-use Waynestate\Nova\CKEditor4Field\Handlers\StorePendingAttachment;
-use Waynestate\Nova\CKEditor4Field\Models\DeleteAttachments;
-use Waynestate\Nova\CKEditor4Field\Models\DetachAttachment;
+use Laravel\Nova\Fields\Field;
 use Laravel\Nova\Fields\Expandable;
-use Laravel\Nova\Fields\Trix;
-use Laravel\Nova\Http\Requests\NovaRequest;
 
-class CKEditor extends Trix
+class CKEditor extends Field
 {
-    use Expandable, SupportsDependentFields;
+    use Expandable;
 
     /**
      * The field's component.
      *
      * @var string
      */
-    public $component = 'nova-ckeditor4';
+    public $component = 'nova-ckeditor';
 
     public function __construct($name, $attribute = null, $resolveCallback = null)
     {
         parent::__construct($name, $attribute, $resolveCallback);
 
-        $defaultConfig = require __DIR__ . '/../config/ckeditor-field.php';
-
         $this->withMeta([
-            'options' => config('nova.ckeditor-field.options', $defaultConfig['options']),
+            'options' => config('nova.ckeditor-field.options', [])
         ]);
     }
 
     /**
      * Set configuration options for the CKEditor editor instance.
      *
-     * @param array $options
+     * @param  array $options
      * @return $this
      */
-    public function options(array $options): static
+    public function options($options)
     {
         $currentOptions = $this->meta['options'] ?? [];
 
@@ -48,90 +40,16 @@ class CKEditor extends Trix
         ]);
     }
 
+
     /**
      * Prepare the element for JSON serialization.
      *
-     * @return array<string, mixed>
+     * @return array
      */
-    public function jsonSerialize(): array
+    public function jsonSerialize()
     {
         return array_merge(parent::jsonSerialize(), [
             'shouldShow' => $this->shouldBeExpanded(),
         ]);
-    }
-
-    /**
-     * @param string|null $disk
-     * @return $this
-     */
-    public function withFiles(string $disk = null, $path = '/'): static
-    {
-        $this->withFiles = true;
-
-        $this->setFilesPlugins();
-
-        $this->disk($disk);
-
-        $this->attach(new StorePendingAttachment($this))
-            ->detach(new DetachAttachment($this))
-            ->delete(new DeleteAttachments($this))
-            ->discard(new DiscardPendingAttachments())
-            ->prunable();
-
-        return $this;
-    }
-
-    /**
-     * Hydrate the given attribute on the model based on the incoming request.
-     *
-     * @param  NovaRequest $request
-     * @param  string $requestAttribute
-     * @param  object $model
-     * @param  string $attribute
-     * @return \Closure|null
-     */
-    protected function fillAttribute(NovaRequest $request, $requestAttribute, $model, $attribute): ?callable
-    {
-        $result = parent::fillAttribute($request, $requestAttribute, $model, $attribute);
-
-        if ($request->{$this->attribute.'DraftId'} && $this->withFiles) {
-            return function () use ($request, $model, $attribute) {
-                config('nova.ckeditor-field.pending_attachment_model')::persistDraft(
-                    $request->{$this->attribute.'DraftId'},
-                    $this,
-                    $model
-                );
-            };
-        }
-
-        return $result;
-    }
-
-    /**
-     * If they already have the extraPlugins set in the config, we need to make sure that the plugins required are added.
-     *
-     * @return void
-     */
-    protected function setFilesPlugins(): void
-    {
-        if (!empty($this->meta['options']['extraPlugins'])) {
-            $extraPlugins = explode(',', preg_replace('/\s+/', '', $this->meta['options']['extraPlugins']));
-
-            if (!in_array('uploadimage', $extraPlugins)) {
-                $extraPlugins[] = 'uploadimage';
-            }
-
-            if (!in_array('image2', $extraPlugins)) {
-                $extraPlugins[] = 'image2';
-            }
-
-            $this->options([
-                'extraPlugins' => implode(',', $extraPlugins),
-            ]);
-        } else {
-            $this->options([
-                'extraPlugins' => 'image2,uploadimage',
-            ]);
-        }
     }
 }

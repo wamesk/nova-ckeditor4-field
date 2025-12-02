@@ -1,5 +1,4 @@
 <?php
-
 return [
     /*
     |--------------------------------------------------------------------------------
@@ -22,44 +21,9 @@ return [
             ['Link', 'Unlink', 'Anchor'],
             '/',
             ['Format', 'FontSize'],
-            ['Maximize', 'ShowBlocks', '-', 'About'],
+            ['Maximize', 'ShowBlocks', '-', 'About']
         ],
-        'versionCheck' => false,
     ],
-
-    /*
-    |--------------------------------------------------------------------------------
-    | Migrations
-    |--------------------------------------------------------------------------------
-    |
-    | This package comes with migrations to create the tables needed to store the attachments.
-    | If you have no need for migrations, you can disable them by setting `enable_migrations` to false
-    | If you want to disable the auto migration, set this option to false.
-    |
-    | If you disable the auto migration, you can publish the migrations and run them manually as followed:
-    | php artisan vendor:publish --tag=nova-ckeditor4-field-migrations
-    |
-    */
-    'migrations' => [
-        'enable_migrations' => true,
-        'auto_migrate' => true,
-    ],
-
-    /*
-    |--------------------------------------------------------------------------------
-    | CKEditor Attachment Models
-    |--------------------------------------------------------------------------------
-    |
-    | The fully qualified class name of models that are used for attachments, such as images.
-    | To use attachments you can set up the file store by appending withFiles() to the Nova Resource.
-    |
-    | Example: CKEditor::make('Body')->withFiles('public')
-    |
-    */
-
-    'attachment_model' => \Waynestate\Nova\CKEditor4Field\Models\Attachment::class,
-    'pending_attachment_model' => \Waynestate\Nova\CKEditor4Field\Models\PendingAttachment::class,
-
 
     /*
     |--------------------------------------------------------------------------------
@@ -85,5 +49,4 @@ return [
     | CKEditor 4 is only supported. This will not work with CKEditor 5
     |
     */
-    'ckeditor_url' => 'https://cdn.ckeditor.com/4.22.1/full-all/ckeditor.js',
-];
+    'ckeditor_url' => 'https://cdn.ckeditor.com/4.22.1/full-all/ckeditor.js',];
